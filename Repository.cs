@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using DevExpress.Data.Browsing;
 using Microsoft.EntityFrameworkCore;
 using MovieSystem;
 
@@ -28,10 +27,10 @@ public interface IRepository<TEntity>
 // Provides a generic implementation of the IRepository interface for Entity Framework.
 public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 {
-    private readonly DataContext _context;
+    private readonly MovieDbContext _context;
 
     // Constructor that accepts an instance of DataContext.
-    public Repository(DataContext context)
+    public Repository(MovieDbContext context)
     {
         _context = context;
     }

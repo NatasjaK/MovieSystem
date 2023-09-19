@@ -1,6 +1,5 @@
-﻿namespace MovieSystem
-{
-    public class _
-    {
-    }
-}
+﻿# Ignore any files in /bin and /obj Folders
+**/bin/*
+**/obj/*
+.vs/
+MovieSystem/.vs # Change this to the name of your git repo for Visual Studio git connection to work
