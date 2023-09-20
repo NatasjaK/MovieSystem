@@ -6,14 +6,18 @@ using MovieSystem.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 
+// https://api.themoviedb.org/3/movie/550?api_key=4aeb86e0014b8416de3595b985066874
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<MovieDbContext>(options =>
+builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {
-    options.UseSqlServer("DefaultConnection"); 
-});
+    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+}));
+builder.Services.AddDbContext<MovieDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 
@@ -23,8 +27,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
+
+
     app.UseSwaggerUI();
+    app.UseCors("corsapp");
 }
+app.UseHttpsRedirection();
 // Get all people
 app.MapGet("/Get/People", async (MovieDbContext context) =>
 {
@@ -139,11 +147,49 @@ app.MapGet("/Get/MovieRatings/{UserId}", async (int UserId, MovieDbContext conte
 })
 .WithName("GetMovieRatings");
 
+// Configure HttpClient with the base address of the API
+var apiKey = "4aeb86e0014b8416de3595b9850668744aeb86e0014b8416de3595b985066874"; // Your TMDb API key
+var baseUrl = "https://api.themoviedb.org/3/";
+var httpClient = new HttpClient();
+httpClient.BaseAddress = new Uri(baseUrl);
+
+// GET movie suggestions in a specific genre from TMDb API
+app.MapGet("/Get/MovieSuggestions/{GenreId}", async (string GenreId, HttpContext httpContext) =>
+{
+    try
+    {
+        // Construct the API URL with the provided GenreId and API key
+        string apiUrl = $"discover/movie?api_key={apiKey}&with_genres={GenreId}";
+
+        // Send a GET request to the TMDb API
+        HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
+
+        // Check if the request was successful
+        if (response.IsSuccessStatusCode)
+        {
+            // Deserialize the response content to a string (you can use JSON deserialization if needed)
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            // Return the response content as a JSON string
+            return Results.Json(responseContent);
+        }
+        else
+        {
+            // Handle the API error if needed
+            // You can log the error or return a custom error message
+            return Results.BadRequest("Failed to fetch movie suggestions.");
+        }
+    }
+    catch (HttpRequestException)
+    {
+        // Handle exceptions if the request fails
+        return Results.BadRequest("Failed to connect to the external API.");
+    }
+})
+.WithName("GetMovieSuggestions");
 
 
 
-
-app.UseHttpsRedirection();
 
 
 app.Run();

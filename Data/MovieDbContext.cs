@@ -1,17 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MovieSystem.Models;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 
 public class MovieDbContext : DbContext
 {
+    public MovieDbContext(DbContextOptions<MovieDbContext> options) : base(options)
+    {
+    }
     public DbSet<Person> People { get; set; }
     public DbSet<Genre> Genres { get; set; }
     public DbSet<Link> Links { get; set; }
 
-    public MovieDbContext(DbContextOptions<MovieDbContext> options) : base(options)
-    {
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,6 +25,12 @@ public class MovieDbContext : DbContext
             new Genre { Id = 9, Title = "Comedy", Description = "Find humor in everyday situations, witty dialogues, and humorous characters that make you laugh out loud." },
             new Genre { Id = 10, Title = "Drama", Description = "Explore complex emotions, interpersonal relationships, and the human condition in emotionally charged and thought-provoking stories." }
         );
-    }
 
+        // Configure the data type for the Rating property in the Link entity
+        modelBuilder.Entity<Link>()
+            .Property(link => link.Rating)
+            .HasColumnType("decimal(18, 2)");
+
+        base.OnModelCreating(modelBuilder);
+    }
 }

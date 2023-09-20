@@ -8,7 +8,7 @@ namespace MovieSystem.Models
         public int Id { get; set; }
         public string? Movie { get; set; }
 
-        public int? Rating { get; set; }
+        public decimal? Rating { get; set; }
 
         public int PersonId { get; set; }
         public Person Person { get; set; }
