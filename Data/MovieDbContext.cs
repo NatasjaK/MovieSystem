@@ -6,6 +6,8 @@ public class MovieDbContext : DbContext
     public MovieDbContext(DbContextOptions<MovieDbContext> options) : base(options)
     {
     }
+    // Parameterless constructor for other use cases
+    public MovieDbContext() { }
     public DbSet<Person> People { get; set; }
     public DbSet<Genre> Genres { get; set; }
     public DbSet<LikedGenre> LikedGenres { get; set; }

@@ -1,28 +1,28 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Internal;
-using Microsoft.Extensions.DependencyInjection;
-using MovieSystem.Models;
 using MovieSystem.RepositoryPattern;
+using Microsoft.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // https://api.themoviedb.org/3/movie/550?api_key=4aeb86e0014b8416de3595b985066874
-
+builder.Services.AddAuthorization();
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+// Configure CORS (Cross-Origin Resource Sharing) for the application services.
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {
-    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+    // Allow requests from any origin (all domains and origins).
+    builder.WithOrigins("*")
+    .AllowAnyMethod()
+    .AllowAnyHeader();
 }));
-/*
-builder.Services.AddDbContext<MovieDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
+// Configure the application to use Entity Framework Core to connect to a SQL Server database.
+builder.Services.AddDbContext<MovieDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 var app = builder.Build();
 
@@ -30,21 +30,30 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-
-
     app.UseSwaggerUI();
     app.UseCors("corsapp");
 }
+// Enable HTTPS redirection for the application
 app.UseHttpsRedirection();
+app.UseAuthorization();
+
+// This line configures a GET route at the endpoint "/Get/People" using the ASP.NET Core routing system.
 // Get all people
-app.MapGet("/Get/People", async (MovieDbContext context) =>
+app.MapGet("/Get/People", (HttpContext httpContext) =>
 {
-    // Retrieve all people from the database
-    var people = context.People;
-    return await people.ToListAsync();
+    // Create an instance of the PersonRepository, which interacts with the database.
+    PersonRepository personRepo = new PersonRepository(new MovieDbContext());
+
+    // Call the GetAll() method from the PersonRepository to retrieve all people from the database.
+    var people = personRepo.GetAll();
+
+    // Return the retrieved people as a response for this HTTP GET request.
+    return people;
 })
+// Assign a name to this route for reference or URL generation.
 .WithName("GetAllPeople");
 
+/*
 // Get all genres
 app.MapGet("/Get/Genres", async (MovieDbContext context) =>
 {
