@@ -8,7 +8,7 @@ public class MovieDbContext : DbContext
     }
     public DbSet<Person> People { get; set; }
     public DbSet<Genre> Genres { get; set; }
-    public DbSet<Link> Links { get; set; }
+    public DbSet<LikedGenre> LikedGenres { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -27,7 +27,7 @@ public class MovieDbContext : DbContext
         );
 
         // Configure the data type for the Rating property in the Link entity
-        modelBuilder.Entity<Link>()
+        modelBuilder.Entity<LikedGenre>()
             .Property(link => link.Rating)
             .HasColumnType("decimal(18, 2)");
 

@@ -1,6 +1,8 @@
-﻿namespace MovieSystem.RepositoryPattern
+﻿using MovieSystem.Models;
+
+namespace MovieSystem.RepositoryPattern
 {
-    public class IPersonRepository
+    public interface IPersonRepository : IRepositoryBase<Person>
     {
     }
 }

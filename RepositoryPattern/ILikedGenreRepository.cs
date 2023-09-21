@@ -1,6 +1,9 @@
-﻿namespace MovieSystem.RepositoryPattern
+﻿using MovieSystem.Models;
+
+namespace MovieSystem.RepositoryPattern
 {
-    public class ILikedGenre
+   
+    public interface ILikedGenreRepository : IRepositoryBase<LikedGenre>
     {
     }
 }

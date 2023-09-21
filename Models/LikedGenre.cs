@@ -2,7 +2,7 @@
 
 namespace MovieSystem.Models
 {
-    public class Link
+    public class LikedGenre
     {
         [Key]
         public int Id { get; set; }

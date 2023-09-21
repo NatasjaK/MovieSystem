@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using MovieSystem.Models;
+using MovieSystem.RepositoryPattern;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,7 @@ builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {
     builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
+/*
 builder.Services.AddDbContext<MovieDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -65,7 +68,7 @@ app.MapGet("/Get/PersonGenres/{PersonId}", async (int PersonId, MovieDbContext c
 .WithName("GetPersonGenres");
 
 //Get genre for specific user
-app.MapGet("/Get/UserGenre/", async (int Id, DataContext context) =>
+app.MapGet("/Get/UserGenre/", async (int Id, MovieDbContext context) =>
 {
     var userGenre = from x in context.UserGenre
                     select new
@@ -115,7 +118,7 @@ app.MapPost("/Add/Genre", async (Genre genre, MovieDbContext context) =>
 .WithName("AddGenre");
 
 // Add a new link for a specific user and genre
-app.MapPost("/Add/UserGenreLink", async (Link link, MovieDbContext context) =>
+app.MapPost("/Add/UserGenreLink", async (LikedGenre link, MovieDbContext context) =>
 {
     // Add a new link to the database for a specific user and genre
     context.Links.Add(link);
@@ -202,7 +205,7 @@ app.MapGet("/Get/MovieSuggestions/{GenreId}", async (string GenreId, HttpContext
 })
 .WithName("GetMovieSuggestions");
 
-
+*/
 
 
 
