@@ -64,6 +64,20 @@ app.MapGet("/Get/PersonGenres/{PersonId}", async (int PersonId, MovieDbContext c
 })
 .WithName("GetPersonGenres");
 
+//Get genre for specific user
+app.MapGet("/Get/UserGenre/", async (int Id, DataContext context) =>
+{
+    var userGenre = from x in context.UserGenre
+                    select new
+                    {
+                        x.User.Id,
+                        x.Genre.Title
+                    };
+
+    return await userGenre.Where(x => x.Id == Id).ToListAsync();
+})
+.WithName("/Get/GenrebyUserId");
+
 // Get all links for a specific user and genre
 app.MapGet("/Get/UserGenreLinks/{UserId}/{GenreId}", async (int UserId, int GenreId, MovieDbContext context) =>
 {
