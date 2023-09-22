@@ -8,10 +8,9 @@ public class MovieDbContext : DbContext
     }
     // Parameterless constructor for other use cases
     public MovieDbContext() { }
-    public DbSet<Person> People { get; set; }
+    public DbSet<Person> Persons { get; set; }
     public DbSet<Genre> Genres { get; set; }
     public DbSet<LikedGenre> LikedGenres { get; set; }
-    public object Person { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

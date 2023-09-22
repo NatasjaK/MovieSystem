@@ -7,7 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // https://api.themoviedb.org/3/movie/550?api_key=4aeb86e0014b8416de3595b985066874
 builder.Services.AddAuthorization();
-// Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // Configure CORS (Cross-Origin Resource Sharing) for the application services.
@@ -32,24 +31,29 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseCors("corsapp");
 }
-// Enable HTTPS redirection for the application
-app.UseHttpsRedirection();
+app.UseCors("corsapp");
 app.UseAuthorization();
 
+// Define routes and handlers
+
 // Get all people
-app.MapGet("/Get/People", (HttpContext httpContext) =>
+app.MapGet("/Get/People", async (MovieDbContext movieDbContext) =>
 {
-    // Use the MovieDbContext provided by dependency injection
-    var personRepo = new PersonRepository(httpContext.RequestServices.GetRequiredService<MovieDbContext>());
-    var people = personRepo.GetAll();
-    return people;
+    var people = await movieDbContext.Persons.ToListAsync();
+    return Results.Ok(people);  
 })
 .WithName("GetAllPeople");
 
-
 // Get all genres
+app.MapGet("/Get/Genres", async (MovieDbContext movieDbContext) =>
+{
+    var genres = await movieDbContext.Genres.ToListAsync();
+    return Results.Ok(genres);
+})
+.WithName("GetAllGenres");
+
+/*// Get all genres
 app.MapGet("/Get/Genres", (HttpContext httpContext) =>
 {
     var genreRepo = new GenreRepository(httpContext.RequestServices.GetRequiredService<MovieDbContext>());
@@ -69,7 +73,7 @@ app.MapPost("/Add/Person", (Person person) =>
     return person;
 
 }).WithName("AddPerson");
-
+*/
 
 
 /*

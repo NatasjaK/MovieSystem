@@ -7,11 +7,14 @@ namespace MovieSystem.Models
     {
         [Key]
         public int Id { get; set; }
+        [Required]
+        [StringLength(50)]
         public string Name { get; set; }
+        [Required]
+        [StringLength(50)]
         public string Email { get; set; }
 
-        public List<Genre> Genres { get; set; }
-        public List<LikedGenre> LikedGenre { get; set; }
+        public List<LikedGenre> LikedGenres { get; set; }
     }
 
 }

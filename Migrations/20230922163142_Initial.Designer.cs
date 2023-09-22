@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MovieSystem.Migrations
 {
     [DbContext(typeof(MovieDbContext))]
-    [Migration("20230922150245_Initial")]
+    [Migration("20230922163142_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,21 +34,12 @@ namespace MovieSystem.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("GenreId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PersonId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GenreId");
-
-                    b.HasIndex("PersonId");
 
                     b.ToTable("Genres");
 
@@ -154,38 +145,29 @@ namespace MovieSystem.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("People");
-                });
-
-            modelBuilder.Entity("MovieSystem.Models.Genre", b =>
-                {
-                    b.HasOne("MovieSystem.Models.Genre", null)
-                        .WithMany("LikedGenres")
-                        .HasForeignKey("GenreId");
-
-                    b.HasOne("MovieSystem.Models.Person", null)
-                        .WithMany("Genres")
-                        .HasForeignKey("PersonId");
+                    b.ToTable("Persons");
                 });
 
             modelBuilder.Entity("MovieSystem.Models.LikedGenre", b =>
                 {
                     b.HasOne("MovieSystem.Models.Genre", "Genre")
-                        .WithMany()
+                        .WithMany("LikedGenres")
                         .HasForeignKey("GenreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MovieSystem.Models.Person", "Person")
-                        .WithMany("LikedGenre")
+                        .WithMany("LikedGenres")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -202,9 +184,7 @@ namespace MovieSystem.Migrations
 
             modelBuilder.Entity("MovieSystem.Models.Person", b =>
                 {
-                    b.Navigation("Genres");
-
-                    b.Navigation("LikedGenre");
+                    b.Navigation("LikedGenres");
                 });
 #pragma warning restore 612, 618
         }
