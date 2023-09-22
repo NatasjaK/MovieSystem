@@ -2,6 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using MovieSystem.RepositoryPattern;
 using Microsoft.AspNetCore;
 using MovieSystem.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Reflection.PortableExecutable;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +40,10 @@ app.UseCors("corsapp");
 app.UseAuthorization();
 
 // Define routes and handlers
+app.MapGet("/myroute", async (HttpContext httpContext) =>
+{
+    await httpContext.Response.SendFileAsync("TestPostRequest.html");
+});
 
 // Get all people
 app.MapGet("/Get/People", async (MovieDbContext movieDbContext) =>
@@ -53,45 +61,95 @@ app.MapGet("/Get/Genres", async (MovieDbContext movieDbContext) =>
 })
 .WithName("GetAllGenres");
 
-/*// Get all genres
-app.MapGet("/Get/Genres", (HttpContext httpContext) =>
+// Get genre for specific person
+app.MapGet("/Get/PersonGenre/{Id}", async (int Id, MovieDbContext movieDbContext) =>
 {
-    var genreRepo = new GenreRepository(httpContext.RequestServices.GetRequiredService<MovieDbContext>());
-    var genres = genreRepo.GetAll();
-    return genres;
+    // Query the database to retrieve liked genres for the person with the specified Id
+    var personGenres = movieDbContext.LikedGenres
+        .Where(pg => pg.Person.Id == Id)
+        .Select(pg => new { pg.Person.Id, pg.Genre.Title })
+        .ToListAsync();
+    return Results.Ok(await personGenres);
 })
-.WithName("GetAllGenres");
+ // Set a custom route name for this endpoint
+ .WithName("GetGenrebyPersonId");
 
-// Add a person
-
-app.MapPost("/Add/Person", (Person person) =>
+// Get movies for specific person
+app.MapGet("/Get/PersonMovie/{Id}", async (int Id, MovieDbContext context) =>
 {
-    MovieDbContext movieContext = new MovieDbContext();
-    PersonRepository personRepo = new PersonRepository(movieContext);
-    personRepo.Create(person);
-    movieContext.SaveChanges();
-    return person;
-
-}).WithName("AddPerson");
-*/
-
-
-/*
-//Get genre for specific user
-app.MapGet("/Get/UserGenre/", async (int Id, MovieDbContext context) =>
-{
-    var userGenre = from x in context.UserGenre
-                    select new
-                    {
-                        x.User.Id,
-                        x.Genre.Title
-                    };
-
-    return await userGenre.Where(x => x.Id == Id).ToListAsync();
+    var personMovies = context.LikedGenres
+        .Where(pg => pg.PersonId == Id)
+        .Select(pg => new { pg.Person.Id, pg.Movie })
+        .ToListAsync();
+    return Results.Ok(await personMovies);
 })
-.WithName("/Get/GenrebyUserId");
+.WithName("GetMoviebyPersonId");
 
-// Get all links for a specific user and genre
+
+// Get rating for specific person and movie
+app.MapGet("/Get/MovieRating/{Id}", async (int Id, MovieDbContext context) =>
+{
+    var movieRatings = context.LikedGenres
+        .Where(pg => pg.PersonId == Id)
+        .Select(pg => new { pg.Person.Id, pg.Movie, pg.Rating })
+        .ToListAsync();
+    return Results.Ok(await movieRatings);
+})
+.WithName("GetMovieRatingbyPersonId");
+
+// Add/Update rating with personId and movie
+app.MapPost("/Post/AddRating", async (HttpContext httpContext, int personId, int rating, string movie, MovieDbContext context) =>
+{
+    var update = context.LikedGenres
+    .FirstOrDefault(pg => pg.PersonId == personId && pg.Movie == movie);
+
+    // If a matching record is found, update the rating and save changes to the database
+    if (update != null)
+    {
+        update.Rating = rating;
+        await context.SaveChangesAsync();
+        return Results.NoContent();
+    }
+    return Results.NotFound();
+})
+.WithName("PostRatingByPersonIdAndMovie");
+
+// Add genre to person
+app.MapPost("/Post/AddGenre", async (int personId, int genreId, MovieDbContext context) =>
+{
+    var response = new LikedGenre
+    {
+        PersonId = personId,
+        GenreId = genreId
+    };
+    context.LikedGenres.Add(response);
+    await context.SaveChangesAsync();
+    return Results.Created($"/Get/PersonGenre/{personId}", response);
+})
+.WithName("PostGenreByPersonIdAndGenreId");
+
+// Get Recommendations based on genre
+app.MapGet("/Get/Recommendations", async (string genreTitle, MovieDbContext context) =>
+{
+    var genre = await context.Genres.FirstOrDefaultAsync(g => g.Title == genreTitle);
+
+    if (genre != null)
+    {
+        var apiKey = "4aeb86e0014b8416de3595b985066874";
+        var url = $"https://api.themoviedb.org/3/discover/movie?api_key={apiKey}&sort_by=popularity.desc&include_adult=true&include_video=false&with_genres={genre.Id}&with_watch_monetization_types=free";
+
+        var client = new HttpClient();
+        var response = await client.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        return Results.Content(content, contentType: "application/json");
+    }
+
+    return Results.NotFound();
+});
+/*// Get all links for a specific user and genre
 app.MapGet("/Get/UserGenreLinks/{UserId}/{GenreId}", async (int UserId, int GenreId, MovieDbContext context) =>
 {
     // Query the database to retrieve links for a specific user and genre
