@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MovieSystem.RepositoryPattern;
 using Microsoft.AspNetCore;
+using MovieSystem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,45 +38,41 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
-// This line configures a GET route at the endpoint "/Get/People" using the ASP.NET Core routing system.
 // Get all people
 app.MapGet("/Get/People", (HttpContext httpContext) =>
 {
-    // Create an instance of the PersonRepository, which interacts with the database.
-    PersonRepository personRepo = new PersonRepository(new MovieDbContext());
-
-    // Call the GetAll() method from the PersonRepository to retrieve all people from the database.
+    // Use the MovieDbContext provided by dependency injection
+    var personRepo = new PersonRepository(httpContext.RequestServices.GetRequiredService<MovieDbContext>());
     var people = personRepo.GetAll();
-
-    // Return the retrieved people as a response for this HTTP GET request.
     return people;
 })
-// Assign a name to this route for reference or URL generation.
 .WithName("GetAllPeople");
 
-/*
+
 // Get all genres
-app.MapGet("/Get/Genres", async (MovieDbContext context) =>
+app.MapGet("/Get/Genres", (HttpContext httpContext) =>
 {
-    // Retrieve all genres from the database
-    var genres = context.Genres;
-    return await genres.ToListAsync();
+    var genreRepo = new GenreRepository(httpContext.RequestServices.GetRequiredService<MovieDbContext>());
+    var genres = genreRepo.GetAll();
+    return genres;
 })
 .WithName("GetAllGenres");
 
-// Get all genres associated with a specific person
-app.MapGet("/Get/PersonGenres/{PersonId}", async (int PersonId, MovieDbContext context) =>
+// Add a person
+
+app.MapPost("/Add/Person", (Person person) =>
 {
-    // Query the database to retrieve genres associated with a specific person
-    var genres = from link in context.Links
-                 join genre in context.Genres on link.GenreId equals genre.Id
-                 where link.PersonId == PersonId
-                 select genre;
+    MovieDbContext movieContext = new MovieDbContext();
+    PersonRepository personRepo = new PersonRepository(movieContext);
+    personRepo.Create(person);
+    movieContext.SaveChanges();
+    return person;
 
-    return await genres.Distinct().ToListAsync();
-})
-.WithName("GetPersonGenres");
+}).WithName("AddPerson");
 
+
+
+/*
 //Get genre for specific user
 app.MapGet("/Get/UserGenre/", async (int Id, MovieDbContext context) =>
 {

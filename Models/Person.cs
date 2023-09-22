@@ -10,8 +10,8 @@ namespace MovieSystem.Models
         public string Name { get; set; }
         public string Email { get; set; }
 
-        public List<Genre> LikedGenres { get; set; }
-        public List<LikedGenre> Links { get; set; }
+        public List<Genre> Genres { get; set; }
+        public List<LikedGenre> LikedGenre { get; set; }
     }
 
 }

@@ -29,7 +29,7 @@ namespace MovieSystem.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     GenreId = table.Column<int>(type: "int", nullable: true),
                     PersonId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -49,7 +49,7 @@ namespace MovieSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Links",
+                name: "LikedGenres",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -61,15 +61,15 @@ namespace MovieSystem.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Links", x => x.Id);
+                    table.PrimaryKey("PK_LikedGenres", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Links_Genres_GenreId",
+                        name: "FK_LikedGenres_Genres_GenreId",
                         column: x => x.GenreId,
                         principalTable: "Genres",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Links_People_PersonId",
+                        name: "FK_LikedGenres_People_PersonId",
                         column: x => x.PersonId,
                         principalTable: "People",
                         principalColumn: "Id",
@@ -104,20 +104,20 @@ namespace MovieSystem.Migrations
                 column: "PersonId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Links_GenreId",
-                table: "Links",
+                name: "IX_LikedGenres_GenreId",
+                table: "LikedGenres",
                 column: "GenreId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Links_PersonId",
-                table: "Links",
+                name: "IX_LikedGenres_PersonId",
+                table: "LikedGenres",
                 column: "PersonId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Links");
+                name: "LikedGenres");
 
             migrationBuilder.DropTable(
                 name: "Genres");

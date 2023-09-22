@@ -11,6 +11,7 @@ public class MovieDbContext : DbContext
     public DbSet<Person> People { get; set; }
     public DbSet<Genre> Genres { get; set; }
     public DbSet<LikedGenre> LikedGenres { get; set; }
+    public object Person { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

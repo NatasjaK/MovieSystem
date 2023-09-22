@@ -30,7 +30,6 @@ namespace MovieSystem.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("GenreId")
@@ -114,7 +113,7 @@ namespace MovieSystem.Migrations
                         });
                 });
 
-            modelBuilder.Entity("MovieSystem.Models.Link", b =>
+            modelBuilder.Entity("MovieSystem.Models.LikedGenre", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -140,7 +139,7 @@ namespace MovieSystem.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("Links");
+                    b.ToTable("LikedGenres");
                 });
 
             modelBuilder.Entity("MovieSystem.Models.Person", b =>
@@ -171,11 +170,11 @@ namespace MovieSystem.Migrations
                         .HasForeignKey("GenreId");
 
                     b.HasOne("MovieSystem.Models.Person", null)
-                        .WithMany("LikedGenres")
+                        .WithMany("Genres")
                         .HasForeignKey("PersonId");
                 });
 
-            modelBuilder.Entity("MovieSystem.Models.Link", b =>
+            modelBuilder.Entity("MovieSystem.Models.LikedGenre", b =>
                 {
                     b.HasOne("MovieSystem.Models.Genre", "Genre")
                         .WithMany()
@@ -184,7 +183,7 @@ namespace MovieSystem.Migrations
                         .IsRequired();
 
                     b.HasOne("MovieSystem.Models.Person", "Person")
-                        .WithMany("Links")
+                        .WithMany("LikedGenre")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -201,9 +200,9 @@ namespace MovieSystem.Migrations
 
             modelBuilder.Entity("MovieSystem.Models.Person", b =>
                 {
-                    b.Navigation("LikedGenres");
+                    b.Navigation("Genres");
 
-                    b.Navigation("Links");
+                    b.Navigation("LikedGenre");
                 });
 #pragma warning restore 612, 618
         }
