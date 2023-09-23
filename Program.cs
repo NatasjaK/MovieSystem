@@ -40,10 +40,6 @@ app.UseCors("corsapp");
 app.UseAuthorization();
 
 // Define routes and handlers
-app.MapGet("/myroute", async (HttpContext httpContext) =>
-{
-    await httpContext.Response.SendFileAsync("TestPostRequest.html");
-});
 
 // Get all people
 app.MapGet("/Get/People", async (MovieDbContext movieDbContext) =>
@@ -71,15 +67,14 @@ app.MapGet("/Get/PersonGenre/{Id}", async (int Id, MovieDbContext movieDbContext
         .ToListAsync();
     return Results.Ok(await personGenres);
 })
- // Set a custom route name for this endpoint
  .WithName("GetGenrebyPersonId");
 
 // Get movies for specific person
 app.MapGet("/Get/PersonMovie/{Id}", async (int Id, MovieDbContext context) =>
 {
     var personMovies = context.LikedGenres
-        .Where(pg => pg.PersonId == Id)
-        .Select(pg => new { pg.Person.Id, pg.Movie })
+        .Where(pm => pm.PersonId == Id)
+        .Select(pm => new { pm.Person.Id, pm.Movie })
         .ToListAsync();
     return Results.Ok(await personMovies);
 })
@@ -90,8 +85,8 @@ app.MapGet("/Get/PersonMovie/{Id}", async (int Id, MovieDbContext context) =>
 app.MapGet("/Get/MovieRating/{Id}", async (int Id, MovieDbContext context) =>
 {
     var movieRatings = context.LikedGenres
-        .Where(pg => pg.PersonId == Id)
-        .Select(pg => new { pg.Person.Id, pg.Movie, pg.Rating })
+        .Where(mr => mr.PersonId == Id)
+        .Select(mr => new { mr.Person.Id, mr.Movie, mr.Rating })
         .ToListAsync();
     return Results.Ok(await movieRatings);
 })
@@ -128,6 +123,12 @@ app.MapPost("/Post/AddGenre", async (int personId, int genreId, MovieDbContext c
 })
 .WithName("PostGenreByPersonIdAndGenreId");
 
+app.MapPost("/api/person", async (MovieDbContext context, Person person) =>
+{
+    context.Persons.Add(person);
+    await context.SaveChangesAsync();
+    return Results.Created($"/api/movie/{person.Id}", person);
+});
 // Get Recommendations based on genre
 app.MapGet("/Get/Recommendations", async (string genreTitle, MovieDbContext context) =>
 {
@@ -146,7 +147,6 @@ app.MapGet("/Get/Recommendations", async (string genreTitle, MovieDbContext cont
 
         return Results.Content(content, contentType: "application/json");
     }
-
     return Results.NotFound();
 });
 /*// Get all links for a specific user and genre
